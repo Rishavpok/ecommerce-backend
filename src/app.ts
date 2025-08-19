@@ -16,9 +16,13 @@ import path from 'path';
 import user from './Controllers/users'
 import products from "./Controllers/products";
 import {errorHandler} from "./Middleware/errorMiddleware";
+import carts from "./Controllers/carts";
+import Orders from "./Controllers/orders";
 
 app.use('/api/users',user)
 app.use('/api/product', authMiddleware, products )
+app.use('/api/cart', authMiddleware , carts)
+app.use('/api/order' , authMiddleware , Orders)
 
 
 // Test route
