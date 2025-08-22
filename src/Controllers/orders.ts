@@ -26,4 +26,15 @@ router.get('/get-orders' , asyncHandler( async (req : RequestUser , res) => {
     })
 })  )
 
+router.put('/cancel-order/:id' , asyncHandler( async (req : RequestUser , res) => {
+    const  { userId } = req
+    const { id } = req.params
+    const service = new OrderService()
+    const order = await  service.cancelOrder(userId, id)
+
+    res.status(200).json({
+        message : 'Order cancelled successfully'
+    })
+})  )
+
 export default  router

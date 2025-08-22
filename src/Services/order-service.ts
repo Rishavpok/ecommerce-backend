@@ -1,6 +1,8 @@
 import Cart from "../Models/cart-model";
 import Order from "../Models/order-model";
 import orders from "../Controllers/orders";
+import Orders from "../Controllers/orders";
+import Product from "../Models/product-models";
 
 export class OrderService  {
     constructor() {
@@ -33,11 +35,28 @@ export class OrderService  {
             status: "pending"
         });
 
+        for (let item of cart.items) {
+            if (item.product.stock < item.quantity) {
+                throw {
+                    status: 400,
+                    message: `${item.product.name} is out of stock or insufficient quantity`
+                };
+            }
+        }
+
         await order.save();
 
         // Optionally, clear the cart after order is placed
         cart.items = [];
         await cart.save();
+
+        for (let item of order.items) {
+            await Product.findByIdAndUpdate(
+                item.product,
+                { $inc: { stock: -item.quantity } }, // decrement stock
+                { new: true }
+            );
+        }
 
         return order;
     }
@@ -52,6 +71,26 @@ export class OrderService  {
         }
 
         return orders
+    }
+
+    async cancelOrder(userId : string , orderId  : string) {
+        const  order  = await Order.findOne({ _id : orderId , user : userId })
+        if(!order ){
+            throw ({
+                status : 400,
+                message: 'No orders found for this user'
+            })
+        }
+
+        if(order.status !== 'pending' ) {
+            throw ({
+                status : 400,
+                message: 'Only pending orders can be cancelled'
+            })
+        }
+        order.status = "cancelled"
+        await order.save();
+        return order
     }
 
 }

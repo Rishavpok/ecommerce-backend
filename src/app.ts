@@ -18,9 +18,10 @@ import products from "./Controllers/products";
 import {errorHandler} from "./Middleware/errorMiddleware";
 import carts from "./Controllers/carts";
 import Orders from "./Controllers/orders";
+import {authorizeRoles} from "./Middleware/roleMiddleware";
 
 app.use('/api/users',user)
-app.use('/api/product', authMiddleware, products )
+app.use('/api/product', authMiddleware, authorizeRoles("admin"), products )
 app.use('/api/cart', authMiddleware , carts)
 app.use('/api/order' , authMiddleware , Orders)
 

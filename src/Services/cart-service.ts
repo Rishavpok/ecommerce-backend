@@ -1,4 +1,5 @@
 import Cart from "../Models/cart-model";
+import Product from "../Models/product-models";
 
 export class CartService {
     constructor() {
@@ -13,6 +14,24 @@ export class CartService {
         }
 
         const cart = await Cart.findOne({ user : userId })
+
+        for (let newItem of items) {
+            const product = await Product.findById(newItem.product);
+
+            if (!product) {
+                throw {
+                    status: 404,
+                    message: 'Product not found'
+                };
+            }
+
+            if (product.stock < newItem.quantity) {
+                throw {
+                    status: 400,
+                    message: `${product.name} has only ${product.stock} left in stock`
+                };
+            }
+        }
 
         if(cart) {
             for (let newItem of items) {
